@@ -31,14 +31,39 @@
 
 package org.deb;
 
+import org.deb.callables.CallableExecutors;
+import org.deb.task.DummyTask;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
 
 public class MyBenchmark {
 
-    @Benchmark
-    public void testMethod() {
-        // This is a demo/sample template for building your JMH benchmarks. Edit as needed.
-        // Put your benchmark code here.
-    }
+	@State(Scope.Benchmark)
+	public static class BenchmarkState {
+		// This executors will be shared among threads.
+		CallableExecutors executors = new CallableExecutors();
+	}
+
+	@State(Scope.Thread)
+	public static class ThreadState {
+		// This 
+		DummyTask task = new DummyTask();
+	}
+
+	@Benchmark
+	public void singleThead(ThreadState state) {
+		state.task.execute();
+	}
+
+	@Benchmark
+	public void multiThread(BenchmarkState state) {
+		try {
+			state.executors.call();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }
